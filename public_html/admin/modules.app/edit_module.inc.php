@@ -49,7 +49,17 @@
     try {
       foreach (array_keys($module->data['settings']) as $key) {
         if (in_array($key, array('id', 'date_updated', 'date_created'))) continue;
-        $module->data['settings'][$key] = isset($_POST['settings'][$key]) ? $_POST['settings'][$key] : '';
+        
+        // check if there are multiple options for this key
+        $allValuesForThisKey = array_filter($module->data['settings'], function($k) {
+          return $k == $key;
+        }, ARRAY_FILTER_USE_KEY);
+
+        if (count($allValuesForThisKey) > 1) {
+          $module->data['settings'][$key] = implode(",", $allValuesForThisKey);
+        } else {
+          $module->data['settings'][$key] = isset($_POST['settings'][$key]) ? $_POST['settings'][$key] : '';
+        }
       }
 
       $module->save();
